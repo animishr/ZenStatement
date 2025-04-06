@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenStatement</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ZenStatement File Parser</h1>
+            <p class="subtitle">Upload, process, and transform your files with ease</p>
+        </header>
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-error">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- CSV Processing Form -->
+        <div class="form-section">
+            <h2 class="form-title">Extract Missing Transactions</h2>
+            <form action="{{ url_for('process_csv') }}" method="post" enctype="multipart/form-data" id="csv-form">
+                <div class="form-group">
+                    <label for="csv-file">Upload transactions CSV File</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="csv-file" name="file" accept=".csv" required onchange="updateFileName(this, 'csv-file-name')">
+                        <div class="file-input-button">Choose File</div>
+                    </div>
+                    <span id="csv-file-name" class="file-name">No file selected</span>
+                </div>
+                <button type="submit" class="btn" id="csv-submit-btn">Extract</button>
+                
+                <!-- Progress Bar for CSV Processing -->
+                <div class="progress-container" id="csv-progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="csv-progress-fill"></div>
+                    </div>
+                    <div class="progress-status">
+                        <div class="progress-message" id="csv-progress-message">Processing CSV file...</div>
+                        <div class="progress-percentage" id="csv-progress-percentage">0%</div>
+                    </div>
+                </div>
+            </form>
+            
+            {% if csv_processed %}
+                <div class="result-section">
+                    <div class="alert alert-success">
+                        Missing transactions extracted successfully!
+                    </div>
+                    <a href="{{ url_for('download_processed_csv', filename=processed_file) }}" class="download-link">
+                        Download missing transactions CSV
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- File Splitting Form -->
+        <div class="form-section">
+            <h2 class="form-title">Get Resolution Status</h2>
+            <form action="{{ url_for('process_split_file') }}" method="post" enctype="multipart/form-data" id="split-form">
+                <div class="form-group">
+                    <label for="split-file">Upload Status CSV File</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="split-file" name="file" required onchange="updateFileName(this, 'split-file-name')">
+                        <div class="file-input-button">Choose File</div>
+                    </div>
+                    <span id="split-file-name" class="file-name">No file selected</span>
+                </div>
+                <button type="submit" class="btn" id="split-submit-btn">Parse</button>
+                
+                <!-- Progress Bar for File Splitting -->
+                <div class="progress-container" id="split-progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="split-progress-fill"></div>
+                    </div>
+                    <div class="progress-status">
+                        <div class="progress-message" id="split-progress-message">Splitting file...</div>
+                        <div class="progress-percentage" id="split-progress-percentage">0%</div>
+                    </div>
+                </div>
+            </form>
+            
+            {% if file_split %}
+                <div class="result-section">
+                    <div class="alert alert-success">
+                        File split successfully!
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                        <a href="{{ url_for('download_resolved', filename=resolved_file) }}" class="download-link">
+                            Download Resolved File
+                        </a>
+                        <a href="{{ url_for('download_unresolved', filename=unresolved_file) }}" class="download-link">
+                            Download Unresolved File
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
