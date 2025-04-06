@@ -6,12 +6,14 @@
     <title>ZenStatement</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Add Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>ZenStatement File Parser</h1>
-            <p class="subtitle">Upload, process, and transform your files with ease</p>
+            <h1>ZenStatement</h1>
+            <p class="subtitle">Upload, process, and transform your transactions files with ease</p>
         </header>
         
         <!-- Flash Messages -->
@@ -30,14 +32,14 @@
             <h2 class="form-title">Extract Missing Transactions</h2>
             <form action="{{ url_for('process_csv') }}" method="post" enctype="multipart/form-data" id="csv-form">
                 <div class="form-group">
-                    <label for="csv-file">Upload transactions CSV File</label>
+                    <label for="csv-file">Select CSV File</label>
                     <div class="file-input-wrapper">
                         <input type="file" id="csv-file" name="file" accept=".csv" required onchange="updateFileName(this, 'csv-file-name')">
-                        <div class="file-input-button">Choose File</div>
+                        <div class="file-input-button">Choose CSV File</div>
                     </div>
                     <span id="csv-file-name" class="file-name">No file selected</span>
                 </div>
-                <button type="submit" class="btn" id="csv-submit-btn">Extract</button>
+                <button type="submit" class="btn" id="csv-submit-btn">Extract Data</button>
                 
                 <!-- Progress Bar for CSV Processing -->
                 <div class="progress-container" id="csv-progress-container">
@@ -45,7 +47,6 @@
                         <div class="progress-bar-fill" id="csv-progress-fill"></div>
                     </div>
                     <div class="progress-status">
-                        <div class="progress-message" id="csv-progress-message">Processing CSV file...</div>
                         <div class="progress-percentage" id="csv-progress-percentage">0%</div>
                     </div>
                 </div>
@@ -54,10 +55,10 @@
             {% if csv_processed %}
                 <div class="result-section">
                     <div class="alert alert-success">
-                        Missing transactions extracted successfully!
+                        CSV file processed successfully!
                     </div>
-                    <a href="{{ url_for('download_processed_csv', filename=processed_file) }}" class="download-link">
-                        Download missing transactions CSV
+                    <a href="{{ url_for('serve_static', filename=processed_file) }}" class="download-link">
+                        Download CSV
                     </a>
                 </div>
             {% endif %}
@@ -68,14 +69,14 @@
             <h2 class="form-title">Get Resolution Status</h2>
             <form action="{{ url_for('process_split_file') }}" method="post" enctype="multipart/form-data" id="split-form">
                 <div class="form-group">
-                    <label for="split-file">Upload Status CSV File</label>
+                    <label for="split-file">Select CSV File</label>
                     <div class="file-input-wrapper">
                         <input type="file" id="split-file" name="file" required onchange="updateFileName(this, 'split-file-name')">
-                        <div class="file-input-button">Choose File</div>
+                        <div class="file-input-button">Choose CSV File</div>
                     </div>
                     <span id="split-file-name" class="file-name">No file selected</span>
                 </div>
-                <button type="submit" class="btn" id="split-submit-btn">Parse</button>
+                <button type="submit" class="btn" id="split-submit-btn">Extract Data</button>
                 
                 <!-- Progress Bar for File Splitting -->
                 <div class="progress-container" id="split-progress-container">
@@ -83,7 +84,6 @@
                         <div class="progress-bar-fill" id="split-progress-fill"></div>
                     </div>
                     <div class="progress-status">
-                        <div class="progress-message" id="split-progress-message">Splitting file...</div>
                         <div class="progress-percentage" id="split-progress-percentage">0%</div>
                     </div>
                 </div>
@@ -92,16 +92,37 @@
             {% if file_split %}
                 <div class="result-section">
                     <div class="alert alert-success">
-                        File split successfully!
+                        Resolution Statuses extracted successfully!
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
                         <a href="{{ url_for('download_resolved', filename=resolved_file) }}" class="download-link">
-                            Download Resolved File
+                            Download Resolved Issues File
                         </a>
                         <a href="{{ url_for('download_unresolved', filename=unresolved_file) }}" class="download-link">
-                            Download Unresolved File
+                            Download Unresolved Issues File
                         </a>
                     </div>
+                    
+                    <!-- Word Frequency Charts -->
+                    {% if show_charts %}
+                        <div class="charts-container">
+                            <h3 class="charts-title">Issue Frequency Analysis</h3>
+                            <div class="charts-grid">
+                                <div class="chart-wrapper">
+                                    <h4>Resolved Issues</h4>
+                                    <div class="chart-container">
+                                        <canvas id="resolved-chart" data-filename="{{ resolved_file }}"></canvas>
+                                    </div>
+                                </div>
+                                <div class="chart-wrapper">
+                                    <h4>Unresolved Issues</h4>
+                                    <div class="chart-container">
+                                        <canvas id="unresolved-chart" data-filename="{{ unresolved_file }}"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>

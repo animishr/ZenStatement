@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 from pathlib import Path
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
 
 from utils.file_uploader import upload_file
 from utils.logging_config import LOGGER
@@ -132,10 +132,75 @@ def process_split_file():
             return render_template('index.html', 
                                   file_split=True, 
                                   resolved_file=resolved_filename,
-                                  unresolved_file=unresolved_filename)
+                                  unresolved_file=unresolved_filename,
+                                  show_charts=True)
         except Exception as e:
             flash(f'Error splitting file: {str(e)}')
             return redirect(url_for('index'))
+
+
+def analyze_issue_frequency(file_path):
+    """
+    Analyze the frequency of words in a file.
+    
+    Args:
+        file_path: Path to the file to analyze
+        top_n: Number of top frequent words to return
+        
+    Returns:
+        FrequencyData: Dictionary with labels, values, and title for the chart
+    """
+    try:
+        data = pd.read_csv(file_path)
+        
+        comments = data[["comment"]] \
+                        .reset_index() \
+                        .groupby("comment") \
+                        .count() \
+                        .reset_index() \
+                        .sort_values(by="index", ascending=False) \
+                        .values.tolist()
+
+        # Prepare data for the chart
+        labels = [comment for comment, _ in comments]
+        values = [count for _, count in comments]
+        
+        return {
+            "labels": labels,
+            "values": values,
+            "title": f"Issues"
+        }
+    
+    except Exception as e:
+        LOGGER.error(f"Error analyzing word frequency: {e}")
+        return {
+            "labels": [],
+            "values": [],
+            "title": "Error analyzing frequency"
+        }
+
+
+@app.route('/api/frequency/<file_type>/<filename>')
+def get_frequency_data(file_type: str, filename: str):
+    try:
+        if file_type not in ['resolved', 'unresolved']:
+            return jsonify({"error": "Invalid file type"}), 400
+        
+        # Construct file path
+        folder = RESOLVED_DIR if file_type == 'resolved' else UNRESOLVED_DIR
+        file_path = os.path.join(folder, filename)
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            return jsonify({"error": "File not found"}), 404
+        
+        # Analyze word frequency
+        frequency_data = analyze_issue_frequency(file_path)
+        
+        return jsonify(frequency_data)
+    except Exception as e:
+        LOGGER.error(f"Error getting frequency data: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/processed/<filename>')
