@@ -1,70 +1,50 @@
-# File Processing Application
+# ZenStatement Assignment
 
-A Flask web application for processing CSV files and splitting text files.
+A Flask web application for extracting missing transactions from orders data CSV files and splitting issues into resolved and unresolved issues CSV files using LLM API calls.
 
-## Features
+## Dependencies
+- flask==3.1.0
+- gunicorn==21.2.0
+- langchain==0.3.23
+- langchain-community==0.3.21
+- langchain-core==0.3.51
+- langchain-google-genai==2.1.2
+- pandas==2.2.3
+- python-dotenv==1.1.0
+- werkzeug==3.1.3
 
-- CSV Processing: Upload a CSV file, add a "Processed" column, and download the result
-- File Splitting: Upload any text file and split it into two parts (first N lines and the rest)
-- Modern UI with progress indicators
-- Containerized with Docker for easy deployment
-- Built with Python 3.11 for improved performance
+## Functionalities
 
-## Python 3.11 Benefits
+- **Extract Missing Transactions:** Upload a transactions CSV file, and download the output CSV with missing transaction details
+- **Parse Resolution Statuses:** Upload Resolution Statuses CSV file and split it following files and download them:
+    - **Resolved issues**
+    - **Unresolved issues** with *issue summary* and *next steps*
+- **Issue Frequency Analysis:** Display the Resolved and Unresolved Issues sorted in descending order of frequency as *horizontal bar charts* respectively
 
-This application uses Python 3.11, which offers several advantages:
+## Setup using Docker
 
-- **Performance**: 10-60% faster than previous Python versions
-- **Better Error Messages**: More precise traceback information
-- **Enhanced Typing**: Improved type annotations and checking
-- **Exception Groups**: Better handling of multiple exceptions
-- **TOML Support**: Built-in support for TOML configuration files
+1. Docker Build:
 
-## Development Setup
-
-### Using UV (Recommended)
-
-This project uses UV, a fast Python package installer and resolver.
-
-1. Install UV:
 ```bash
-pip install uv
+docker build -t zen-statement-app .
 ```
 
-2. Create a virtual environment and install dependencies:
-```bash
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-uv pip install -e .
-```
-
-3. Run the application:
-```bash
-flask run
-```
-
-### Using Docker
-
-1. Development mode:
+2. Run Service:
 
 ```bash
-docker-compose -f docker-compose.dev.yml up --build
-```
-
-2. Production mode:
-
-```bash
-docker-compose up --build
+docker run -d -p 8000:8000 --env-file .env zen-statement-app
 ```
 
 ## Configuration
 
 Configuration is managed through environment variables and the `.env` file:
 
-- Copy `.env.example` to `.env` and adjust settings as needed
-- For production, create a `.env.production` file with secure settings
+Create `.env` file and adjust settings as needed
 
+### Sample `.env` file
 
-## License
-
-MIT
+```bash
+GEMINI_API_KEY=API_Key
+GOOGLE_API_KEY=API_Key
+USE_GOOGLE_AUTH=true
+```
