@@ -57,7 +57,7 @@
                     <div class="alert alert-success">
                         CSV file processed successfully!
                     </div>
-                    <a href="{{ url_for('serve_static', filename=processed_file) }}" class="download-link">
+                    <a href="{{ url_for('download_processed_csv', filename=processed_file) }}" class="download-link">
                         Download CSV
                     </a>
                 </div>
