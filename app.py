@@ -32,9 +32,9 @@ os.makedirs(UNRESOLVED_DIR, exist_ok=True)
 # Custom function to split a file into two parts
 def split_file(filename):
     """
-    Splits a file into two parts:
-    - First 5 lines go to 'resolved' folder
-    - Remaining lines go to 'unresolved' folder
+    Splits a "Resolution Statuses" file into two parts:
+    - Resolved Issues identified by a LLM to be saved to 'out/resolved' folder
+    - Remaining Issues go to 'out/unresolved' folder
     """
     try:
         # Construct file paths
@@ -46,6 +46,8 @@ def split_file(filename):
         unresolved_path = UNRESOLVED_DIR / unresolved_filename
         
         comments = pd.read_csv(original_path, encoding="latin-1")
+
+        # Get List of Resolved/Unresolved Issues
         resolved, unresolved = parse_comments(comments)
         
         pd.DataFrame(resolved).to_csv(resolved_path, index=False)
@@ -141,14 +143,7 @@ def process_split_file():
 
 def analyze_issue_frequency(file_path):
     """
-    Analyze the frequency of words in a file.
-    
-    Args:
-        file_path: Path to the file to analyze
-        top_n: Number of top frequent words to return
-        
-    Returns:
-        FrequencyData: Dictionary with labels, values, and title for the chart
+    Analyze the frequency of issue types in a file.
     """
     try:
         data = pd.read_csv(file_path)
@@ -194,7 +189,7 @@ def get_frequency_data(file_type: str, filename: str):
         if not os.path.exists(file_path):
             return jsonify({"error": "File not found"}), 404
         
-        # Analyze word frequency
+        # Analyze issue frequency
         frequency_data = analyze_issue_frequency(file_path)
         
         return jsonify(frequency_data)

@@ -11,6 +11,8 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
+# Pydantic Class to make sure that 
+# LLM output is in a fixed structured format
 
 class ResolutionStatus(BaseModel):
 
@@ -31,6 +33,7 @@ class ResolutionStatus(BaseModel):
     )
 
 
+# LLM Prompt
 parser_prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -69,13 +72,18 @@ You are an expert in order resolution analysis. You are provided with a dataset 
     ]
 )
 
-
+# Configure the rate limiter settings
 rate_limiter = InMemoryRateLimiter(requests_per_second=0.2,
                                    check_every_n_seconds=0.1,
                                    max_bucket_size=10)
+
+# LLM instance
 comment_parser_model = ChatGoogleGenerativeAI(model="gemini-2.0-flash-001",
                                                  rate_limiter=rate_limiter)
+
+# Set Prompt Cache to save on API calls
 set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 
+# Lang Chain Chain object
 COMMENT_PARSER_CHAIN = (parser_prompt | 
                         comment_parser_model.with_structured_output(ResolutionStatus))
