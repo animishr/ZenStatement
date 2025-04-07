@@ -22,10 +22,10 @@ class ResolutionStatus(BaseModel):
     is_resolved: bool | None = Field(...,
         description="Has the issue been resolved"
     )
-    issue_unresolved_summary: str | None = Field(
+    issue_category: str | None = Field(
         default=None,
-        description="Concise summary of why the case "
-        "is unresolved."
+        description="Broad Category of the unresolved " \
+        "issue"
     )
     next_steps: List[str] | None = Field(...,
         description="Next Steps to reolve the issue, "
@@ -61,7 +61,12 @@ You are an expert in order resolution analysis. You are provided with a dataset 
 
     `comment`: (str) Comment.
     `is_resolved`: (bool) Set to True if resolved. False otherwise.
-    `issue_unresolved_summary`: (string) If the case is unresolved, give a concise summary of why the case is unresolved. Set to `null` if the issue is resolved.
+    `issue_category`: (string) Set to `null` if the issue is resolved. If the case is unresolved, categorize the case into one of the following categories:
+        - **Missing/Insufficient Information**: Issues where key data (e.g., payment reference, order details, transaction ID) is absent or incomplete, preventing proper reconciliation or investigation.
+        - **System/Technical Errors**: Issues stemming from system malfunctions, gateway problems, or interruptions in the reconciliation process itself.
+        - **Payment Discrepancies/Mismatches**: Issues where the recorded payment amount, payment reference, or other details don't match expected values or related records (e.g., orders).
+        - **Awaiting External Actions/Confirmation**: Issues that require action or confirmation from external parties like customers, payment providers, or internal teams (e.g., accounting).
+        - **Pending/Delayed Status**: Issues where the payment is in a temporary state (e.g., processing, pending) requiring waiting or further clarification.
     `next_steps` (list of strings): If the case is unresolved, give the next steps to resolve the issue.
 """
         ),
