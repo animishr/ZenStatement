@@ -21,6 +21,12 @@ def parse_comments(comments):
         if resolution_status["is_resolved"]:
             resolved_issues.append({"order_id": order_id, "comment": comment})
         else:
-            unresolved_issues.append(resolution_status)
+            issue_category = resolution_status["issue_category"]
+            next_steps = resolution_status["next_steps"]
+            data = {"order_id": order_id, 
+                    "comment": comment, 
+                    "issue_category": issue_category, 
+                    "next_steps": next_steps}
+            unresolved_issues.append(data)
 
     return resolved_issues, unresolved_issues
